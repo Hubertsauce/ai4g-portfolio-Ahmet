@@ -24,18 +24,18 @@ _List the files, or link to them. Notebook exports, screenshots, scripts._
 > Write them down here once you know them.
 
 **Project title:**
-
+Burnout Guard
 **My pair partner:**
-
+Allan Hassan (24097292)
 **Tool we had to use:**
-
+n8n.io
 **SDG we had to address:**
-
+SDG 3 - Good health & well-being
 **What problem does it solve, and for whom?**
-_Name a real, specific user. "Everyone" is not a user._
+It helps high-stakes professionals, such as healthcare workers, emergency responders, and executive leaders who operate in "constant pressure" environments and often ignore early physiological and psychological signs of burnout (sleep problems, meeting density, extreme workload) until they reach a breaking point. This isn't just a personal wellbeing issue, burnout in these roles can lead to critical errors in high-stakes professional responsibilities since their decisions might have serious consequences and affect others' life.
 
 **What did you build?**
-_Two or three sentences. What can a user actually do with it?_
+An automated N8N workflow that acts as a proactive mental health assistant for high-stakes professionals. The system evaluates real-world calendar density across the work week. A Google Gemini AI node calculates a dynamic Burnout Risk Score and generates tailored Micro-Recovery Actions, such as a 5-minute walk or breathing break scheduled into open calendar gaps. These suggestions are delivered straight to the user's inbox via an automated Gmail briefing.
 
 **Link to the live thing (if any):**
 _Deployed URL, workflow export, video demo - whatever proves it works._
