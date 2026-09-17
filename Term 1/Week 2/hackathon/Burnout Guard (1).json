@@ -1,0 +1,428 @@
+{
+  "name": "Burnout Guard",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 8
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -128,
+        -16
+      ],
+      "id": "dfc31214-1089-4c25-91a9-4e032f05fa4e",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1Wv0qxrIJNzW9nWh2ne7iEC8iIvnAethMqmuDFFMQ5MU",
+          "mode": "list",
+          "cachedResultName": "Burnout Guard - User Profiles",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Wv0qxrIJNzW9nWh2ne7iEC8iIvnAethMqmuDFFMQ5MU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet_1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Wv0qxrIJNzW9nWh2ne7iEC8iIvnAethMqmuDFFMQ5MU/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        96,
+        -16
+      ],
+      "id": "dfeaf6ea-1175-434f-9349-6ec966b19a71",
+      "name": "user_info",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "znT92xB7sSFD46e7",
+          "name": "Google Sheets account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "calendar": {
+          "__rl": true,
+          "value": "burnoutguard@gmail.com",
+          "mode": "list",
+          "cachedResultName": "burnoutguard@gmail.com"
+        },
+        "timeMin": "=",
+        "timeMax": "=",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.3,
+      "position": [
+        288,
+        -16
+      ],
+      "id": "510833b1-f538-4d45-8b8c-0dd0dd16ed9f",
+      "name": "week_density",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "Eje1FNNXHkSX62MR",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "710ec907-1d91-4a78-b44c-2c0c07b4bf22",
+              "leftValue": "={{ $json.start.dateTime }}",
+              "rightValue": "={{ $now.toFormat('yyyy-MM-dd') }}",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        464,
+        112
+      ],
+      "id": "fec32d41-d609-4bf6-8deb-a6ee6e290692",
+      "name": "todays_appointments"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are an executive health and stress-prevention AI assistant. \n\nUSER PROFILE:\n- Name: {{ $('user_info').item.json.Name }}\n- Role: {{ $('user_info').item.json.Role }}\n- Stress Tolerance: {{ $('user_info').item.json.Stress_Tolerance }}\n- Preferred Reset Method: {{ $('user_info').item.json.Preferred_Reset }}\n\nCALENDAR DATA:\n- Full Week Events:\n{{ $('week_density').all().map(item => `- ${item.json.summary || 'Busy'} (From: ${item.json.start.dateTime } To: ${item.json.end.dateTime })`).join('\\n') }}\n\n- Today's Events:\n{{ $('todays_appointments').all().map(item => `- ${item.json.summary || 'Busy'} (From ${item.json.start.dateTime} To: ${item.json.end.dateTime} `).join('\\n') }}\n\nTASK:\n1. Analyze the work density for the entire week (count total meetings and notice heavy back-to-back blocks).\n2. Analyze today's specific schedule.\n3. Evaluate the burnout risk level (Low, Medium, High, or Critical) based on the user's stress tolerance and schedule density of the week.\n4. Recommend a short, specific stress-relief action tailored to their preferred reset method ({{ $('user_info').item.json.Preferred_Reset }}).\n\nOUTPUT FORMAT:\nAlways return the response in this exact layout:\nReturn strictly a JSON object with only two keys:\n{\n  \"risk_level\": \"Low\", \n  \"email\": {\n    \"title\": \"email title\"\n    \"body\": \"email body\",\n  }\n}\nThe body of the email should short, easy to read, contain text formatted with week density, daily density, reset action, and mandatory disclaimer.\"\n\nRules for risk_level: Must strictly be one of these exact words: \"Low\", \"Medium\", \"High\", or \"Critical\".",
+        "needsFallback": true,
+        "messages": {
+          "messageValues": []
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        848,
+        0
+      ],
+      "id": "823cf6f5-c204-40d2-9b08-c953b7e7086d",
+      "name": "Basic LLM Chain",
+      "executeOnce": true,
+      "retryOnFail": true,
+      "waitBetweenTries": 3000,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        656,
+        0
+      ],
+      "id": "9dd5137a-80cf-4fb4-8fc2-87f976fb67e4",
+      "name": "combined_week_and_day_data"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get raw text output from the Gemini AI node\nlet rawText = $input.first().json.text || \"\";\n\n// Strip away markdown code block fences if Gemini adds them (e.g. ```json ... ```)\nrawText = rawText.replace(/```json/gi, '').replace(/```/gi, '').trim();\n\ntry {\n  // Parse string into a true JSON object\n  const parsedJSON = JSON.parse(rawText);\n  return [{ json: parsedJSON }];\n} catch (error) {\n  // Demo Safety Net: If AI formatting glitches, fall back gracefully instead of breaking\n  return [{\n    json: {\n      risk_level: \"High\",\n      email: {\n        title: \"Daily Health Briefing\",\n        body: rawText\n      }\n    }\n  }];\n}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1184,
+        0
+      ],
+      "id": "63b0321f-0b4c-4b75-afb4-6bd045ea7be3",
+      "name": "ai_response_from_text_to_json_filter"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "7498d619-be90-4171-9a38-1909a59e18c3",
+              "leftValue": "={{ $json.risk_level }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1392,
+        0
+      ],
+      "id": "5022b68a-6034-4ff0-afcf-3e42e72dc05e",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-3.1-flash-lite",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        1008,
+        160
+      ],
+      "id": "3b013f5b-2569-4adb-a21e-a116e0c44043",
+      "name": "Gemini fallback model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "gsAq7vnL1G2aArdW",
+          "name": "Google Gemini(PaLM) Api account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        832,
+        176
+      ],
+      "id": "24e828f4-0ec7-4fea-ae32-6309d68b4b21",
+      "name": "Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "gsAq7vnL1G2aArdW",
+          "name": "Google Gemini(PaLM) Api account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('user_info').item.json.Email }}",
+        "subject": "={{ $json.email.title }} - Burnout Guard",
+        "emailType": "text",
+        "message": "={{ $json.email.body }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1616,
+        -96
+      ],
+      "id": "4bdf6c18-b9fc-44ef-ad4e-2b2872986c04",
+      "name": "Send an automated message",
+      "webhookId": "eb1653ec-e011-49b5-8036-4f17055d5562",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "l2yVVY1XdCBDPX0T",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('user_info').item.json.Email }}",
+        "subject": "=Daily Health Reminder - Burnout Guard",
+        "emailType": "text",
+        "message": "=Hello! We couldn't sync your calendar automatically today due to a temporary connection pause.\n\nDaily Health Checklist:\n\n    Check your schedule for back-to-back meetings manually.\n\n    Schedule at least one 10-minute break away from your screen today.\n\nDisclaimer: Automated backup notification.",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1616,
+        80
+      ],
+      "id": "f5532c7b-595a-49d1-bb8f-e7a085f3801f",
+      "name": "Send a fallback message",
+      "webhookId": "eb1653ec-e011-49b5-8036-4f17055d5562",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "l2yVVY1XdCBDPX0T",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "user_info",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "user_info": {
+      "main": [
+        [
+          {
+            "node": "week_density",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "week_density": {
+      "main": [
+        [
+          {
+            "node": "todays_appointments",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "combined_week_and_day_data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "todays_appointments": {
+      "main": [
+        [
+          {
+            "node": "combined_week_and_day_data",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "ai_response_from_text_to_json_filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "combined_week_and_day_data": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ai_response_from_text_to_json_filter": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Send an automated message",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a fallback message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini fallback model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "8733085c-072b-4b62-a97e-d7efc089ea9e",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "d9fef67f0ccdf181eb42d5db96a63bcdfc1a766ac9ed3cafd0a9223c821d708c"
+  },
+  "nodeGroups": [],
+  "id": "460jUJfn2wp1pTnv",
+  "tags": []
+}
