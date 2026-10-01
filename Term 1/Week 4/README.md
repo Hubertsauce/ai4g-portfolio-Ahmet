@@ -62,10 +62,12 @@ We made the film in ComfyUI. Our laptop doesn't have a strong enough graphics ca
 Ahmet:
 The video's using Comfyui
 Storyboard
+workflow's
 
 Nina:
 Presentation
 Readme
+uploaded on Youtube
 
 Together:
 We made the script together.
