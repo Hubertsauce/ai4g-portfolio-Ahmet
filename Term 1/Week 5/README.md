@@ -25,28 +25,28 @@ _List the files, or link to them. Notebook exports, screenshots, scripts._
 
 **Project title:**
 Income Predictor
+
 **My pair partner:**
 Oguzhan Bolluk (24124907)
+
 **Tool we had to use:**
 scikit-learn — the Python machine-learning library from this week's lecture. Work in Jupyter or in your editor.
+
 **SDG we had to address:**
 sdg 8 - decent work & economic growth
-**What problem does it solve, and for whom?**
 
+**What problem does it solve, and for whom?**
 Many people with a low income do not get the financial support they are entitled to, often because they do not know about it or never apply. In the Netherlands, more than €1 billion of benefits (rent benefit, healthcare benefit and child budget) was not claimed in 2021 by households that had a right to it (CPB, 2025). Organisations that want to help these people have limited time and money, so they cannot contact everyone. They have to choose who to approach first.
 Our user is a **social welfare organisation with a budget for 500 home visits per year**. The model predicts which people most likely have a low income (`<=50K`), so the organisation can use its limited visits for the people who need support the most. The people who benefit in the end are **low-income households** that would otherwise miss out on help.
 A missed person (false negative) does not get support and may end up in debt. An unnecessary visit (false positive) costs capacity that could have helped someone else. That is why we chose balanced accuracy: the model has to find low incomes **and** avoid wasting visits.
 
 **What did you build?**
-
 We built a machine learning model (gradient boosting) that predicts whether a person has a low income (`<=50K`), based on details such as age, education, job, working hours and marital status. A social welfare organisation can enter a person's details and get a prediction and a probability, for example "low income, 99% chance". It can then use this to decide who to contact first with its limited budget of 500 home visits.
 
 **Link to the live thing (if any):**
-
 https://colab.research.google.com/drive/1YMcDwYLW7TYkk5X4bf6H9T-eSsrAcM3C?usp=sharing
 
 **How do I run it?**
-
 1. Open `Hackathon5.ipynb` in [Google Colab](https://colab.research.google.com).
 2. Upload `adult.csv` with the folder icon on the left, so it is in the same folder as the notebook.
 3. Choose **Runtime > Run all**. The notebook runs from top to bottom without extra installs. It takes about 5 to 10 minutes, mostly for the tuning in step 6.
